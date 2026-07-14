@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Configs globais limpas
+  output: "standalone",
 };
 
 export default nextConfig;
