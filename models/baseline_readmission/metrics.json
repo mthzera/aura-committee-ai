@@ -1,0 +1,73 @@
+{
+  "target": "target_readmission_event",
+  "rows": 3295,
+  "train_rows": 2471,
+  "test_rows": 824,
+  "class_counts": {
+    "0": 3222,
+    "1": 73
+  },
+  "accuracy": 0.9575242718446602,
+  "roc_auc": 0.9671905155776124,
+  "classification_report": {
+    "0": {
+      "precision": 0.9935979513444302,
+      "recall": 0.9627791563275434,
+      "f1-score": 0.9779458097038437,
+      "support": 806.0
+    },
+    "1": {
+      "precision": 0.3023255813953488,
+      "recall": 0.7222222222222222,
+      "f1-score": 0.4262295081967213,
+      "support": 18.0
+    },
+    "accuracy": 0.9575242718446602,
+    "macro avg": {
+      "precision": 0.6479617663698896,
+      "recall": 0.8425006892748828,
+      "f1-score": 0.7020876589502825,
+      "support": 824.0
+    },
+    "weighted avg": {
+      "precision": 0.9784973413212706,
+      "recall": 0.9575242718446602,
+      "f1-score": 0.9658937545738338,
+      "support": 824.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      776,
+      30
+    ],
+    [
+      5,
+      13
+    ]
+  ],
+  "numeric_features": [
+    "news2_last",
+    "news2_average_7d",
+    "news2_delta_7d",
+    "respiratory_rate",
+    "oxygen_saturation",
+    "oxygen_support_flag",
+    "systolic_bp",
+    "heart_rate",
+    "consciousness_flag",
+    "temperature",
+    "completeness",
+    "aura_alerted_flag",
+    "acute_decompensation_flag",
+    "triage_score"
+  ],
+  "categorical_features": [
+    "unit",
+    "care_line",
+    "triage_band"
+  ],
+  "dropped_features": [
+    "age"
+  ]
+}

@@ -1,0 +1,102 @@
+record_date,patient_name,unit,care_line,news2_last,news2_average_7d,news2_delta_7d,oxygen_saturation,heart_rate,acute_decompensation_flag,deterioration_reversed_flag,no_return_flag,bad_discharge_within_10d,bad_discharge_condition,bad_discharge_date,triage_score,triage_band,bad_discharge_probability,bad_discharge_prediction,target_label
+2026-06-04,Newton Martins Neiva Junior,MO,C. Continuados,4.0,2.0,2.0,95.0,70.0,0,0,0,0,,,13.6,critico,0.7610839254466277,1,monitoramento_ativo
+2026-06-03,Jean Carlos De Carvalho Prado,ABV,C. Continuados,4.0,2.0,2.0,93.0,83.0,0,0,0,0,,,12.5,critico,0.7579461420616426,1,monitoramento_ativo
+2026-06-04,Maria Eugenia Conte Pilla,MO,C. Continuados,4.0,2.0,2.0,95.0,60.0,0,0,0,0,,,12.5,critico,0.7572055060700644,1,monitoramento_ativo
+2026-06-02,Maria Lucia Andreoli Pivato,MO,C. Continuados,4.0,2.0,2.0,96.0,70.0,0,0,0,0,,,12.5,critico,0.7320166255387409,1,monitoramento_ativo
+2026-06-07,Francisco Akio Mitsunaga,MO,C. Continuados,4.0,2.0,2.0,95.0,79.0,0,0,0,0,,,12.5,critico,0.7309636662057215,1,monitoramento_ativo
+2026-06-03,Crisanto Gomes Passos Neto,ABV,Transição,5.0,1.0,4.0,92.0,104.0,1,1,0,0,,,22.0,critico,0.7225253171446829,1,reversao_piora
+2026-06-07,Vanessa Oliveira Mello,ABV,C. Continuados,5.0,3.0,2.0,98.0,100.0,0,0,0,0,,,14.8,critico,0.697323495672198,1,monitoramento_ativo
+2026-06-03,Roberto Willy Heimpel,ABV,C. Continuados,4.0,1.0,3.0,95.0,70.0,0,0,0,0,,,15.4,critico,0.6869734485660821,1,monitoramento_ativo
+2026-06-06,Joao Domenici Sobrinho,IB,C. Continuados,4.0,2.0,2.0,95.0,66.0,0,0,0,0,,,13.6,critico,0.6777389455783157,1,monitoramento_ativo
+2026-06-06,Maria Aparecida Da Silva,ABV,C. Continuados,4.0,2.0,2.0,94.0,69.0,0,0,0,0,,,12.5,critico,0.6720270503731234,1,monitoramento_ativo
+2026-06-04,Fernando Maestrello Caleiro Palma,MO,C. Continuados,5.0,2.0,3.0,95.0,97.0,0,0,0,0,,,16.6,critico,0.6485113810253235,1,monitoramento_ativo
+2026-06-03,Antonio Da Silva Pereira,IB,C. Continuados,4.0,2.0,2.0,98.0,69.0,0,0,0,0,,,13.6,critico,0.6267930728210681,1,monitoramento_ativo
+2026-06-06,Norival Barsotti,ABV,C. Paliativos,5.0,2.0,3.0,92.0,71.0,0,0,0,0,,,17.7,critico,0.6238356505772532,1,monitoramento_ativo
+2026-06-05,Helio Do Nascimento Junior,ABV,Transição,5.0,2.0,3.0,95.0,60.0,0,0,1,0,,,18.9,critico,0.6209985063720266,1,sem_retorno
+2026-06-05,Andre Luis Franca Trindade,ABV,Reabilitacao,5.0,2.0,3.0,98.0,87.0,0,0,1,0,,,18.9,critico,0.6141817637956757,1,sem_retorno
+2026-06-02,Norma Dalvio Mazzante,IB,C. Paliativos,8.0,4.0,4.0,91.0,93.0,0,0,0,0,,,26.6,critico,0.6109642513075522,1,monitoramento_ativo
+2026-06-01,Luciene Marques Lizardo,ABV,C. Paliativos,3.0,1.0,2.0,95.0,74.0,0,0,1,0,,,11.9,critico,0.6046724861244853,1,sem_retorno
+2026-06-07,Marcos Antonio Joazeiro,ABV,C. Continuados,4.0,2.0,2.0,96.0,64.0,0,0,0,0,,,12.5,critico,0.5998577847013931,1,monitoramento_ativo
+2026-06-07,Enzo Ralheonco Venancio,AHC,,6.0,4.0,2.0,94.0,84.0,0,0,0,0,,,15.9,critico,0.5903222608585048,1,monitoramento_ativo
+2026-06-04,Nelson De Moraes Mendes Neto,ABV,C. Continuados,4.0,2.0,2.0,92.0,72.0,0,0,0,0,,,13.6,critico,0.579754687300777,1,monitoramento_ativo
+2026-06-06,Gustavo De Souza Schmidt Goncalves,IB,Transição,4.0,2.0,2.0,98.0,88.0,0,0,0,0,,,13.6,critico,0.5683078633203323,1,monitoramento_ativo
+2026-06-02,Pompea Dutra Brazil,MO,C. Continuados,6.0,4.0,2.0,92.0,88.0,0,0,0,0,,,14.8,critico,0.5651310461751212,1,monitoramento_ativo
+2026-06-05,Gerson Franca,IB,C. Continuados,4.0,2.0,2.0,93.0,74.0,0,0,0,0,,,12.5,critico,0.5650175356640166,1,monitoramento_ativo
+2026-06-06,Reynalda Panella,MO,C. Continuados,4.0,2.0,2.0,94.0,63.0,0,0,1,0,,,14.8,critico,0.5622230054487174,1,sem_retorno
+2026-06-03,Luiz Gonzaga De Oliveira Camargo,MO,C. Continuados,4.0,1.0,3.0,95.0,64.0,0,0,1,0,,,17.5,critico,0.5616609094460217,1,sem_retorno
+2026-06-04,Tulio Brejao Filho,ABV,Transição,5.0,2.0,3.0,96.0,61.0,0,0,0,0,,,16.6,critico,0.5545989116763237,1,monitoramento_ativo
+2026-06-06,Edileuza Bispo Da Costa Correa,AHC,,4.0,2.0,2.0,99.0,66.0,0,0,0,0,,,13.7,critico,0.5532155820028006,1,monitoramento_ativo
+2026-06-03,Thereza Angelica De Freitas Marques Ribeiro,IB,C. Continuados,6.0,2.0,4.0,94.0,70.0,0,0,0,0,,,22.6,critico,0.5484555411856891,1,monitoramento_ativo
+2026-06-05,Walter Ferreira Do Nascimento,AHC,,5.0,3.0,2.0,92.0,69.0,0,0,0,0,,,14.8,critico,0.5453183046661795,1,monitoramento_ativo
+2026-06-04,Pedrina Ramos De Souza,MO,Transição,4.0,2.0,2.0,94.0,61.0,0,0,0,0,,,12.5,critico,0.5450856799788348,1,monitoramento_ativo
+2026-06-04,Ester Coelho Da Silva Racy,IB,C. Continuados,5.0,3.0,2.0,97.0,60.0,0,0,1,0,,,15.9,critico,0.5408575796198863,1,sem_retorno
+2026-06-07,Kaua Da Silva Gonçalves,AHC,,5.0,3.0,2.0,92.0,78.0,0,0,0,0,,,14.8,critico,0.5398346610216481,1,monitoramento_ativo
+2026-06-04,Cristovao Canedo Gomes,ABV,C. Continuados,4.0,2.0,2.0,93.0,97.0,0,0,0,0,,,13.6,critico,0.5375559042388214,1,monitoramento_ativo
+2026-06-06,Reinaldo Kuhl,ABV,Transição,4.0,2.0,2.0,98.0,70.0,0,0,0,0,,,12.5,critico,0.5335167891245899,1,monitoramento_ativo
+2026-06-07,Wilson Marciano Thieghi,AHC,,8.0,5.0,3.0,97.0,58.0,0,0,0,0,,,21.9,critico,0.5231486842399131,1,monitoramento_ativo
+2026-06-06,Maria Do Carmo Da Silva Cirino,MO,C. Continuados,4.0,2.0,2.0,95.0,78.0,0,0,1,0,,,13.7,critico,0.5222604949758073,1,sem_retorno
+2026-06-04,Elizabeth Soares De Moura Chamma,AHC,,5.0,3.0,2.0,93.0,82.0,0,0,1,0,,,14.8,critico,0.5222498524015441,1,sem_retorno
+2026-06-05,Sandro Rodrigues Pereira Lacerda,AHC,,5.0,3.0,2.0,96.0,74.0,0,0,0,0,,,13.7,critico,0.5207019693492259,1,monitoramento_ativo
+2026-06-05,Jose Goncalves De Arruda,ABV,C. Continuados,4.0,2.0,4.0,94.0,59.0,0,0,0,0,,,15.8,critico,0.5120917709850332,1,monitoramento_ativo
+2026-06-07,Anderson Vieira Rodrigues Lino,ABV,C. Continuados,5.0,3.0,2.0,98.0,78.0,0,0,1,0,,,14.8,critico,0.5114816652020815,1,sem_retorno
+2026-06-05,Isabelle Mattos Yamauche Vieira,AHC,,6.0,4.0,2.0,93.0,95.0,0,0,0,0,,,14.8,critico,0.5113298308085759,1,monitoramento_ativo
+2026-06-05,Dora De Andrea Roma,AHC,,7.0,3.0,4.0,98.0,69.0,0,0,0,0,,,23.4,critico,0.5096826244431698,1,monitoramento_ativo
+2026-06-02,Arthur Reis Anjos,AHC,,6.0,4.0,2.0,100.0,53.0,0,0,0,0,,,16.9,critico,0.49523922679353927,0,monitoramento_ativo
+2026-06-04,Camila Maria Coimbra Albejante,AHC,,5.0,3.0,2.0,95.0,76.0,0,0,1,0,,,16.1,critico,0.4935286509020711,0,sem_retorno
+2026-06-05,Glaucia Maria Nogueira De Oliveira,ABV,C. Paliativos,4.0,1.0,4.0,95.0,80.0,0,0,0,0,,,16.5,critico,0.4931832198031426,0,monitoramento_ativo
+2026-06-02,Silvana Maria Jose Silva Sergeant,IB,Reabilitacao,5.0,2.0,3.0,93.0,76.0,0,0,1,0,,,17.8,critico,0.4821961837702634,0,sem_retorno
+2026-06-04,Maria Celia Abreu Fonseca,IB,C. Continuados,6.0,3.0,3.0,98.0,92.0,0,0,1,0,,,21.2,critico,0.47934461877436807,0,sem_retorno
+2026-06-05,Lorrany Maria Da Silva Lima,AHC,,8.0,6.0,2.0,95.0,85.0,0,0,0,0,,,19.9,critico,0.4784542780109591,0,monitoramento_ativo
+2026-06-01,Joao Carlos Coelho,MO,C. Continuados,4.0,2.0,2.0,93.0,67.0,0,0,1,0,,,13.7,critico,0.4663644745414294,0,sem_retorno
+2026-06-03,Noemi Provasi Ohara,MO,C. Continuados,5.0,2.0,3.0,98.0,82.0,0,0,1,0,,,18.6,critico,0.46177478793403953,0,sem_retorno
+2026-06-07,Suely Oliveira Guerra,AHC,,6.0,4.0,2.0,92.0,94.0,0,0,1,0,,,16.0,critico,0.46136397719134853,0,sem_retorno
+2026-06-06,Silvia Regina Da Conceicao Namias,AHC,,6.0,4.0,2.0,98.0,66.0,0,0,0,0,,,16.0,critico,0.46134813658773033,0,monitoramento_ativo
+2026-06-06,Ronaldo De Sousa Ribeiro,AHC,,9.0,5.0,4.0,93.0,58.0,0,0,0,0,,,24.9,critico,0.45154541035231216,0,monitoramento_ativo
+2026-06-07,Nicholas De Castro Lima Casarino,AHC,,6.0,4.0,2.0,95.0,92.0,0,0,0,0,,,15.9,critico,0.4481988633768915,0,monitoramento_ativo
+2026-06-01,Jose Eduardo Ardono,ABV,Transição,4.0,2.0,3.0,99.0,40.0,0,0,1,0,,,16.9,critico,0.4481684692261651,0,sem_retorno
+2026-06-06,Jacques Charles Maurice Montier,AHC,,9.0,7.0,2.0,95.0,62.0,0,0,0,0,,,20.1,critico,0.44015939063522613,0,monitoramento_ativo
+2026-06-07,Estefany Amy Shimeno,AHC,,7.0,5.0,2.0,96.0,94.0,0,0,1,0,,,20.2,critico,0.4372169955042569,0,sem_retorno
+2026-06-04,Gaucile Denize Leme,AHC,,10.0,6.0,4.0,95.0,48.0,0,0,1,0,,,29.3,critico,0.4366626826853278,0,sem_retorno
+2026-06-07,Irene Da Purificacao Xibante Nunes,AHC,,4.0,2.0,2.0,94.0,93.0,0,0,1,0,,,13.7,critico,0.43461183848700535,0,sem_retorno
+2026-06-01,Anna Floripes Munhos Guenca,AHC,,6.0,4.0,2.0,98.0,75.0,0,0,0,0,,,15.9,critico,0.4330549059611448,0,monitoramento_ativo
+2026-06-03,Ricardo De Lucca Manno,AHC,,7.0,5.0,2.0,94.0,70.0,1,0,0,0,,,19.2,critico,0.43284815683952044,0,monitoramento_ativo
+2026-06-06,Noemia Bersi De Oliveira,IB,Transição,5.0,3.0,2.0,93.0,75.0,0,0,0,0,,,14.8,critico,0.4241220129914408,0,monitoramento_ativo
+2026-06-03,Fernando Nathan Figueiredo Byrne,AHC,,8.0,5.0,3.0,94.0,91.0,0,0,0,0,,,22.0,critico,0.4224625765962119,0,monitoramento_ativo
+2026-06-04,Maria Da Luz Alves,ABV,C. Paliativos,4.0,2.0,2.0,91.0,54.0,0,0,0,0,,,14.3,critico,0.4182082227048762,0,monitoramento_ativo
+2026-06-06,Angela Machado,IB,C. Continuados,5.0,2.0,3.0,93.0,88.0,0,0,0,0,,,18.6,critico,0.41759030972633626,0,monitoramento_ativo
+2026-06-06,Maria Teresa Malatesta,IB,C. Continuados,4.0,2.0,2.0,93.0,71.0,0,0,1,0,,,13.7,critico,0.4124150924935151,0,sem_retorno
+2026-06-07,Sergio De Souza Evangelista,ABV,C. Continuados,6.0,3.0,3.0,90.0,74.0,0,0,1,0,,,21.8,critico,0.40985165345545155,0,sem_retorno
+2026-06-06,Maria Jose Da Conceicao,AHC,,7.0,5.0,2.0,92.0,73.0,0,0,0,0,,,17.8,critico,0.40803068013892285,0,monitoramento_ativo
+2026-06-04,Hector Moreira De Andrade,AHC,,7.0,5.0,2.0,95.0,95.0,0,0,0,0,,,17.6,critico,0.40600084271754283,0,monitoramento_ativo
+2026-06-07,Miliana Pacheco Bicalho,AHC,,5.0,3.0,2.0,99.0,91.0,0,0,0,0,,,14.8,critico,0.4046940582105623,0,monitoramento_ativo
+2026-06-01,Eliana Aparecida Pavanello Sokame,ABV,C. Paliativos,6.0,4.0,4.0,91.0,91.0,0,0,0,0,,,19.9,critico,0.3986612254555287,0,monitoramento_ativo
+2026-06-03,Maria Beatriz Godoy Sora,IB,Transição,4.0,2.0,2.0,92.0,88.0,0,0,0,0,,,13.4,critico,0.39806119962201963,0,monitoramento_ativo
+2026-06-02,Eliane Ribeiro Da Silva Valezi,AHC,,8.0,6.0,2.0,98.0,65.0,0,0,0,0,,,21.1,critico,0.39734444196441765,0,monitoramento_ativo
+2026-06-04,George Naohiro Arai,IB,Reabilitacao,5.0,2.0,3.0,89.0,67.0,0,0,0,0,,,18.4,critico,0.39621833925236566,0,monitoramento_ativo
+2026-06-07,Luiz Henrique Da Cruz Ribeiro,AHC,,9.0,7.0,2.0,97.0,95.0,0,0,0,0,,,21.4,critico,0.39586334424038816,0,monitoramento_ativo
+2026-06-05,Leandro Ferreira Passos,AHC,,6.0,3.0,3.0,95.0,87.0,0,0,1,0,,,19.8,critico,0.3943136065788743,0,sem_retorno
+2026-06-03,Regina Helena Belon,AHC,,6.0,4.0,2.0,97.0,68.0,0,0,1,0,,,17.1,critico,0.39103134058223726,0,sem_retorno
+2026-06-05,Clecio Martins,ABV,Transição,12.0,2.0,10.0,94.0,150.0,1,0,0,0,,,50.5,critico,0.3872548538543475,0,monitoramento_ativo
+2026-06-05,Nathaly Rocha De Souza,AHC,,7.0,6.0,1.0,98.0,75.0,0,0,0,0,,,13.8,critico,0.38714539110479906,0,monitoramento_ativo
+2026-06-05,Elcio Da Silva Pereira,IB,Reabilitacao,5.0,3.0,2.0,93.0,91.0,0,0,0,0,,,13.2,critico,0.3823232766406319,0,monitoramento_ativo
+2026-06-07,Tiago Albiero Rodrigues,IB,C. Continuados,5.0,2.0,3.0,,,0,0,0,0,,,17.8,critico,0.37435817754496453,0,monitoramento_ativo
+2026-06-04,Antonio Lopes Mairena,IB,C. Continuados,5.0,3.0,2.0,93.0,60.0,0,0,1,0,,,14.8,critico,0.36540338062887395,0,sem_retorno
+2026-06-06,Valdir Martins Correa,AHC,,6.0,3.0,3.0,91.0,64.0,0,0,0,0,,,20.4,critico,0.36459971222854165,0,monitoramento_ativo
+2026-06-07,Rogerio Alvim Tavares,AHC,,6.0,3.0,3.0,93.0,82.0,0,0,0,0,,,18.8,critico,0.3603556073479331,0,monitoramento_ativo
+2026-06-05,Rodrigo Barbosa Demarch,AHC,,5.0,4.0,1.0,95.0,76.0,0,0,1,0,,,13.1,critico,0.3529462909065719,0,sem_retorno
+2026-06-02,Sergio Samuel Goncalves Dos Santos,AHC,,7.0,5.0,2.0,94.0,96.0,0,0,0,0,,,17.8,critico,0.3515639540950232,0,monitoramento_ativo
+2026-06-03,Gustavo Cecchi Teno Castilho,IB,C. Paliativos,4.0,2.0,2.0,96.0,87.0,0,0,0,0,,,15.7,critico,0.34216211154182424,0,monitoramento_ativo
+2026-06-06,Sonia Cristina Dugaich Pereira,IB,C. Continuados,5.0,3.0,2.0,92.0,78.0,0,0,0,0,,,14.8,critico,0.33603531253248087,0,monitoramento_ativo
+2026-06-02,Gustavo Santana De Souza Silva,AHC,,4.0,2.0,2.0,89.0,80.0,0,0,0,0,,,15.4,critico,0.33575719242220825,0,monitoramento_ativo
+2026-06-04,Victor Calumby Segouras,AHC,,4.0,2.0,2.0,98.0,69.0,0,0,1,0,,,14.6,critico,0.3219093091797499,0,sem_retorno
+2026-06-03,Vera Lucia De Castro Menezes,IB,C. Continuados,7.0,5.0,2.0,95.0,69.0,0,0,0,0,,,19.9,critico,0.3192874487912804,0,monitoramento_ativo
+2026-06-07,Edna Hamada,AHC,,7.0,5.0,2.0,93.0,102.0,0,0,0,0,,,16.8,critico,0.31840550238580245,0,monitoramento_ativo
+2026-06-03,Leonina Aparecida Mas De Oliveira,AHC,,11.0,9.0,2.0,89.0,103.0,0,0,0,0,,,24.2,critico,0.31069701917511594,0,monitoramento_ativo
+2026-06-05,Mateus Fernandes Ribeiro,AHC,,7.0,6.0,1.0,97.0,75.0,0,0,0,0,,,15.8,critico,0.30916337356555545,0,monitoramento_ativo
+2026-06-05,Hans Bernhard Jordan,IB,Transição,4.0,2.0,2.0,97.0,80.0,0,0,0,0,,,12.1,critico,0.302250639674265,0,monitoramento_ativo
+2026-06-05,Marcela Aguiar Rosa,AHC,,8.0,7.0,1.0,99.0,99.0,0,0,0,0,,,16.2,critico,0.2965345018393591,0,monitoramento_ativo
+2026-06-05,Maria Lucia Carvalho Franco,IB,C. Continuados,4.0,2.0,2.0,93.0,88.0,0,0,0,0,,,11.0,critico,0.28255295432000005,0,monitoramento_ativo
+2026-06-04,Generoso Collis,AHC,,8.0,2.0,6.0,95.0,94.0,0,0,1,0,,,33.0,critico,0.26947431988043336,0,sem_retorno
+2026-06-05,Mariangela Dias Ferreira,IB,Reabilitacao,4.0,2.0,2.0,93.0,71.0,0,0,0,0,,,11.0,critico,0.23300540828283214,0,monitoramento_ativo
+2026-06-05,Alice De Almeida Massa,IB,C. Paliativos,6.0,2.0,4.0,87.0,91.0,0,0,0,0,,,21.8,critico,0.20206950349845088,0,monitoramento_ativo
+2026-06-05,Caroline Do Prado Fernandes,AHC,,4.0,3.0,1.0,95.0,117.0,0,0,0,0,,,9.6,alto,0.15193824199869418,0,monitoramento_ativo
