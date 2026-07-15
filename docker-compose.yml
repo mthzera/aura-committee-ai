@@ -2,6 +2,8 @@ services:
   api:
     build: .
     image: aura-committee-ai:latest
+    # Usa só a imagem local — não baixa nada da internet no start
+    pull_policy: never
     container_name: aura-committee-ai
     ports:
       - "3001:3000"

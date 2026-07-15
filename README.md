@@ -19,6 +19,31 @@ npm run dev -- --port 3001
 
 Abra `http://localhost:3001`.
 
+## Docker (API)
+
+**Uma vez, com internet** (build da imagem):
+
+```bash
+docker compose build
+```
+
+**No notebook, sem internet** (só sobe a imagem local):
+
+```bash
+docker compose up -d --no-build
+```
+
+Abra `http://localhost:3001`.
+
+Para parar: `docker compose down`.
+
+Se o notebook for outra máquina, exporte a imagem depois do build e importe lá:
+
+```bash
+docker save aura-committee-ai:latest -o aura-committee-ai.tar
+docker load -i aura-committee-ai.tar
+```
+
 ## Gerar dataset de treino
 
 O script procura automaticamente uma planilha `.xlsx` na pasta da aplicação ou na pasta pai.
