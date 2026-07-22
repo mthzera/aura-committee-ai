@@ -19,10 +19,27 @@ import {
 import type {
   FeatureSignal,
   LabelSignal,
+  RetrospectiveAvoidability,
   TrainingDatasetRow,
   TriageAnalysis,
   TriageCase,
 } from "@/lib/committee-analysis";
+import {
+  avoidabilityLabel,
+  describeNews2Band,
+  effectivenessReasonLabel,
+  formatDateBr,
+} from "@/lib/retrospective-avoidability";
+
+type PredictionResult = {
+  prob_readmission: number | null;
+  prob_effective: number | null;
+  event_already_occurred?: boolean;
+  avoidability?: RetrospectiveAvoidability["avoidability"];
+  best_action?: string;
+  retrospective?: RetrospectiveAvoidability;
+  explanation: string;
+};
 
 type ApiResponse = TriageAnalysis & {
   sourceFileName: string;
@@ -55,7 +72,7 @@ export function CommitteeApp() {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
-  const [prediction, setPrediction] = useState<{ prob_readmission: number; prob_effective: number; explanation: string } | null>(null);
+  const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   const [loadingPrediction, setLoadingPrediction] = useState(false);
 
   useEffect(() => {
@@ -116,11 +133,27 @@ export function CommitteeApp() {
   function handleAnalyzePatient(patientId: string) {
     if (!analysis) return;
     const trainingRow = analysis.trainingRows.find(r => r.patient_id === patientId);
+    const triageCase = analysis.cases.find((item) => item.id === patientId);
     if (!trainingRow) return;
 
     setSelectedPatientId(patientId);
     setPrediction(null);
     setLoadingPrediction(true);
+
+    // Casos com evento final já trazem a análise de evitabilidade do /analyze.
+    if (triageCase?.retrospective) {
+      setPrediction({
+        prob_readmission: null,
+        prob_effective: null,
+        event_already_occurred: true,
+        avoidability: triageCase.retrospective.avoidability,
+        best_action: triageCase.retrospective.bestAction,
+        retrospective: triageCase.retrospective,
+        explanation: triageCase.retrospective.explanation,
+      });
+      setLoadingPrediction(false);
+      return;
+    }
 
     fetch("/api/predict", {
       method: "POST",
@@ -135,8 +168,9 @@ export function CommitteeApp() {
       .catch(err => {
         console.error(err);
         setPrediction({
-          prob_readmission: 0,
-          prob_effective: 0,
+          prob_readmission: null,
+          prob_effective: null,
+          event_already_occurred: false,
           explanation: "Erro ao gerar explicação. Verifique se os modelos foram treinados."
         });
       })
@@ -640,14 +674,24 @@ function CaseRow({
   item: TriageCase;
   onAnalyze?: () => void;
   isLoading?: boolean;
-  prediction?: { prob_readmission: number; prob_effective: number; explanation: string } | null;
+  prediction?: PredictionResult | null;
 }) {
+  const alreadyOccurred = prediction?.event_already_occurred === true;
+  const retrospective = prediction?.retrospective ?? item.retrospective;
+  const avoidability = prediction?.avoidability ?? retrospective?.avoidability;
+  const bestAction = prediction?.best_action ?? retrospective?.bestAction;
+
   return (
     <>
       <tr className="align-top">
         <td className="px-4 py-3">
           <div className="font-medium text-slate-100">{item.patientName}</div>
           <div className="mt-1 text-xs text-slate-500">{item.careLine ?? "Sem linha de cuidado"}</div>
+          {item.retrospective && (
+            <div className="mt-2 inline-flex rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-200">
+              {avoidabilityLabel(item.retrospective.avoidability)}
+            </div>
+          )}
           {onAnalyze && (
             <button
               onClick={onAnalyze}
@@ -655,7 +699,11 @@ function CaseRow({
               className="mt-3 flex items-center gap-1.5 rounded bg-indigo-500/20 px-2 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-500/30 disabled:opacity-50"
             >
               <Brain className="h-3.5 w-3.5" />
-              {isLoading ? "Consultando IA..." : "Explicar com IA"}
+              {isLoading
+                ? "Consultando IA..."
+                : item.retrospective
+                  ? "Ver evitabilidade"
+                  : "Explicar com IA"}
             </button>
           )}
         </td>
@@ -692,11 +740,150 @@ function CaseRow({
       </tr>
       {prediction && (
         <tr>
-          <td colSpan={5} className="border-t border-indigo-500/20 bg-indigo-950/10 px-4 py-4">
+          <td
+            colSpan={5}
+            className={
+              alreadyOccurred
+                ? "border-t border-amber-500/20 bg-amber-950/10 px-4 py-4"
+                : "border-t border-indigo-500/20 bg-indigo-950/10 px-4 py-4"
+            }
+          >
             <div className="flex items-start gap-3">
-              <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-indigo-400" />
-              <div className="space-y-2 text-sm leading-relaxed text-indigo-100">
-                <ExplanationText text={prediction.explanation} />
+              <Sparkles
+                className={
+                  alreadyOccurred
+                    ? "mt-0.5 h-5 w-5 shrink-0 text-amber-400"
+                    : "mt-0.5 h-5 w-5 shrink-0 text-indigo-400"
+                }
+              />
+              <div
+                className={
+                  alreadyOccurred
+                    ? "w-full space-y-3 text-sm leading-relaxed text-amber-100"
+                    : "space-y-2 text-sm leading-relaxed text-indigo-100"
+                }
+              >
+                {alreadyOccurred && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-amber-200">
+                      Parecer clínico retrospectivo
+                    </span>
+                    {avoidability && (
+                      <span className="inline-flex rounded border border-amber-400/50 bg-amber-400/10 px-2 py-0.5 text-[11px] font-medium text-amber-100">
+                        {avoidabilityLabel(avoidability)}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {alreadyOccurred && retrospective?.clinicalImpression && (
+                  <div className="rounded-lg border border-amber-500/30 bg-slate-950/40 p-3">
+                    <div className="text-[11px] uppercase tracking-wide text-amber-300/80">
+                      Impressão clínica
+                    </div>
+                    <div className="mt-1 text-sm text-amber-50">{retrospective.clinicalImpression}</div>
+                  </div>
+                )}
+
+                {alreadyOccurred && retrospective?.news2Reading && (
+                  <div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-3">
+                    <div className="text-[11px] uppercase tracking-wide text-sky-300/80">
+                      Como ler o NEWS2 neste caso
+                    </div>
+                    {retrospective.news2Reading.peakScore !== null && (
+                      <div className="mt-2 text-sm text-sky-50">
+                        Pico <span className="font-semibold">{retrospective.news2Reading.peakScore}/20</span>
+                        {" — "}
+                        {describeNews2Band(retrospective.news2Reading.peakScore)}
+                      </div>
+                    )}
+                    {retrospective.news2Reading.peakMeaning && (
+                      <p className="mt-2 text-sm text-sky-100/90">{retrospective.news2Reading.peakMeaning}</p>
+                    )}
+                    {retrospective.news2Reading.riseSummary && (
+                      <p className="mt-2 text-sm text-sky-100/90">{retrospective.news2Reading.riseSummary}</p>
+                    )}
+                    <ul className="mt-3 space-y-1 border-t border-sky-500/20 pt-2 text-xs text-sky-100/70">
+                      {retrospective.news2Reading.guide.map((line) => (
+                        <li key={line}>• {line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {alreadyOccurred && retrospective && (retrospective.actionPlan?.length ?? 0) > 0 && (
+                  <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3">
+                    <div className="text-[11px] uppercase tracking-wide text-emerald-300/80">
+                      Conduta esperada
+                    </div>
+                    <ol className="mt-2 list-decimal space-y-2 pl-4 text-sm text-emerald-50">
+                      {(retrospective.actionPlan ?? [bestAction].filter(Boolean)).map((step) => (
+                        <li key={step}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+
+                {alreadyOccurred && retrospective && retrospective.missedTriggers.length > 0 && (
+                  <div className="rounded-lg border border-rose-500/30 bg-rose-950/20 p-3">
+                    <div className="text-[11px] uppercase tracking-wide text-rose-300/80">
+                      Falhas na janela
+                    </div>
+                    <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-rose-50/90">
+                      {retrospective.missedTriggers.slice(0, 3).map((trigger) => (
+                        <li key={trigger}>{trigger}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {alreadyOccurred && retrospective && retrospective.priorAlerts.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="text-[11px] uppercase tracking-wide text-amber-300/80">
+                      Linha do tempo dos alertas
+                    </div>
+                    <div className="grid gap-2 md:grid-cols-2">
+                      {retrospective.priorAlerts.slice(0, 4).map((alert) => (
+                        <div
+                          key={`${alert.date}-${alert.unit}-${alert.daysBeforeEvent}`}
+                          className="rounded border border-amber-500/20 bg-slate-950/50 px-3 py-2 text-xs text-amber-100/90"
+                        >
+                          <div className="font-medium text-amber-50">
+                            {formatDateBr(alert.date)} · −{alert.daysBeforeEvent}d
+                          </div>
+                          <div className="mt-1 text-amber-100/70">
+                            NEWS2 {alert.news2Last ?? "n/a"}
+                            {alert.news2Last !== null ? ` (${describeNews2Band(alert.news2Last)})` : ""}
+                          </div>
+                          <div className="mt-1 text-amber-100/70">
+                            {alert.interventionUnit ?? "sem intervenção"} · {effectivenessReasonLabel(alert.effectivenessReason)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {alreadyOccurred && retrospective?.references && retrospective.references.length > 0 && (
+                  <div className="rounded-lg border border-slate-600/40 bg-slate-950/40 p-3">
+                    <div className="text-[11px] uppercase tracking-wide text-slate-400">
+                      Referências de apoio à decisão
+                    </div>
+                    <ul className="mt-2 space-y-2 text-xs text-slate-300">
+                      {retrospective.references.map((ref) => (
+                        <li key={ref.label}>
+                          <span className="font-medium text-slate-100">{ref.label}</span>
+                          <span className="mt-0.5 block text-slate-400">{ref.detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {!alreadyOccurred && <ExplanationText text={prediction.explanation} />}
+                {alreadyOccurred && !retrospective?.clinicalImpression && (
+                  <ExplanationText text={prediction.explanation} />
+                )}
               </div>
             </div>
           </td>

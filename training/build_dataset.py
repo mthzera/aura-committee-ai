@@ -15,7 +15,12 @@ from openpyxl.utils.datetime import from_excel
 SHEET_CANDIDATES = ("Pct Watcher", "Registros")
 BAD_DISCHARGE_WINDOW_DAYS = 10
 FINAL_EVENT_TERMS = ("reintern", "hospitaliza", "internacao hospitalar", "internação hospitalar", "obito", "óbito")
-ACUTE_TERMS = ("descompensacao aguda", "descompensação aguda")
+ACUTE_TERMS = (
+    "descompensacao aguda",
+    "descompensação aguda",
+    "compensacao aguda",
+    "compensação aguda",
+)
 FAVORABLE_OUTCOME_TERMS = (
     "melhora clinica",
     "melhora clínica",
@@ -152,6 +157,9 @@ def build_dataset(path: Path) -> list[dict[str, Any]]:
     for index, values in enumerate(rows, start=1):
         row = {key: value for key, value in zip(keys, values) if key}
         if not row or not pick(row, ALIASES["patient_name"]):
+            continue
+        clinical_alteration = text(row, ALIASES["clinical_alteration"])
+        if not is_acute_decompensation(clinical_alteration):
             continue
         dataset.append(build_training_row(row, index, bad_events))
 

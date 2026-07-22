@@ -1,13 +1,24 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
+import unicodedata
 from pathlib import Path
 
 import joblib
 import pandas as pd
 
 from train_baseline import CATEGORICAL_FEATURES, NUMERIC_FEATURES
+
+FINAL_EVENT_TERMS = (
+    "reintern",
+    "hospitaliza",
+    "internacao hospitalar",
+    "internação hospitalar",
+    "obito",
+    "óbito",
+)
 
 
 def ensure_model_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -21,36 +32,65 @@ def ensure_model_features(df: pd.DataFrame) -> pd.DataFrame:
     return prepared
 
 
-def main() -> None:
-    input_data = sys.stdin.read()
-    if not input_data:
-        print(json.dumps({"error": "No input provided"}))
-        sys.exit(1)
+def strip_accents(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value)
+    return "".join(char for char in normalized if unicodedata.category(char) != "Mn")
 
-    try:
-        data = json.loads(input_data)
-    except json.JSONDecodeError:
-        print(json.dumps({"error": "Invalid JSON"}))
-        sys.exit(1)
 
-    df = ensure_model_features(pd.DataFrame([data]))
+def normalize_text(value: object) -> str:
+    if value is None:
+        return ""
+    return re.sub(r"\s+", " ", strip_accents(str(value)).lower()).strip()
 
-    model_readmission_path = Path("models/baseline_readmission/model.joblib")
-    model_effective_path = Path("models/baseline_effective_intervention/model.joblib")
 
-    if not model_readmission_path.exists() or not model_effective_path.exists():
-        print(json.dumps({"error": "Models not found. Please train them first."}))
-        sys.exit(1)
+def has_final_event(data: dict) -> bool:
+    if data.get("final_event_flag") == 1:
+        return True
+    if data.get("target_readmission_event") == 1:
+        return True
+    if data.get("target_label") == "reinternacao_inevitavel":
+        return True
 
-    model_readmission = joblib.load(model_readmission_path)
-    model_effective = joblib.load(model_effective_path)
+    status = normalize_text(data.get("monitoring_status"))
+    if not status:
+        return False
+    return any(normalize_text(term) in status for term in FINAL_EVENT_TERMS)
 
-    feature_columns = [col for col in NUMERIC_FEATURES + CATEGORICAL_FEATURES if col in df.columns]
-    x = df[feature_columns]
 
-    prob_readmission = float(model_readmission.predict_proba(x)[0][1])
-    prob_effective = float(model_effective.predict_proba(x)[0][1])
+def build_final_event_explanation(data: dict) -> str:
+    retrospective = data.get("retrospective")
+    if isinstance(retrospective, dict) and retrospective.get("explanation"):
+        return str(retrospective["explanation"])
 
+    patient_name = data.get("patient_name", "Paciente")
+    status = data.get("monitoring_status") or "evento final registrado"
+    return "\n".join(
+        [
+            f"**Análise para {patient_name}**",
+            "• **Evento já ocorrido:** reinternação, hospitalização ou óbito já está registrado neste caso.",
+            f"• **Status na planilha:** {status}",
+            "",
+            "**Leitura para o comitê:**",
+            "• Este não é um alerta preventivo de reinternação.",
+            "• Use o caso para revisão retrospectiva: janela de intervenção, gatilhos perdidos e aprendizado do protocolo.",
+            "• A probabilidade preventiva do modelo foi omitida de propósito para não contradizer o desfecho já conhecido.",
+        ]
+    )
+
+
+def serialize_retrospective(data: dict) -> dict | None:
+    retrospective = data.get("retrospective")
+    if not isinstance(retrospective, dict):
+        return None
+    return retrospective
+
+
+def build_predictive_explanation(
+    data: dict,
+    *,
+    prob_readmission: float,
+    prob_effective: float,
+) -> str:
     aura_alerted = data.get("aura_alerted_flag", 0) == 1
     acute_decomp = data.get("acute_decompensation_flag", 0) == 1
 
@@ -98,11 +138,66 @@ def main() -> None:
             "• **Efetividade (Sem Alerta AURA):** Não houve alerta AURA e as métricas não indicam um perfil típico de reversão de piora ativa."
         )
 
+    return "\n".join(explanation_lines)
+
+
+def main() -> None:
+    input_data = sys.stdin.read()
+    if not input_data:
+        print(json.dumps({"error": "No input provided"}))
+        sys.exit(1)
+
+    try:
+        data = json.loads(input_data)
+    except json.JSONDecodeError:
+        print(json.dumps({"error": "Invalid JSON"}))
+        sys.exit(1)
+
+    if has_final_event(data):
+        retrospective = serialize_retrospective(data)
+        payload = {
+            "prob_readmission": None,
+            "prob_effective": None,
+            "event_already_occurred": True,
+            "explanation": build_final_event_explanation(data),
+        }
+        if retrospective:
+            payload["retrospective"] = retrospective
+            payload["avoidability"] = retrospective.get("avoidability")
+            payload["best_action"] = retrospective.get("bestAction") or retrospective.get("best_action")
+        output = json.dumps(payload, ensure_ascii=False)
+        sys.stdout.buffer.write(output.encode("utf-8"))
+        sys.stdout.buffer.write(b"\n")
+        return
+
+    df = ensure_model_features(pd.DataFrame([data]))
+
+    model_readmission_path = Path("models/baseline_readmission/model.joblib")
+    model_effective_path = Path("models/baseline_effective_intervention/model.joblib")
+
+    if not model_readmission_path.exists() or not model_effective_path.exists():
+        print(json.dumps({"error": "Models not found. Please train them first."}))
+        sys.exit(1)
+
+    model_readmission = joblib.load(model_readmission_path)
+    model_effective = joblib.load(model_effective_path)
+
+    feature_columns = [col for col in NUMERIC_FEATURES + CATEGORICAL_FEATURES if col in df.columns]
+    x = df[feature_columns]
+
+    prob_readmission = float(model_readmission.predict_proba(x)[0][1])
+    prob_effective = float(model_effective.predict_proba(x)[0][1])
+
     output = json.dumps(
         {
             "prob_readmission": prob_readmission,
             "prob_effective": prob_effective,
-            "explanation": "\n".join(explanation_lines),
+            "event_already_occurred": False,
+            "explanation": build_predictive_explanation(
+                data,
+                prob_readmission=prob_readmission,
+                prob_effective=prob_effective,
+            ),
         },
         ensure_ascii=False,
     )

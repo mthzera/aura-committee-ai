@@ -5,10 +5,13 @@ MVP para apoiar a reunião do comitê AURA com triagem de pacientes, dataset sup
 ## Fluxo atual
 
 1. A interface recebe a planilha Patient Watcher em `.xlsx`.
-2. A rota `/api/analyze` lê a aba `Pct Watcher` ou `Registros`.
-3. O motor calcula score clínico com NEWS2 atual, basal de 7 dias, delta, sinais vitais, alerta AURA e campos de intervenção.
+2. A rota `/api/analyze` lê a aba `Pct Watcher` (casos) e, quando existir, a aba `Registros` (trajetória de sinais).
+3. O motor **filtra apenas casos de descompensação aguda** (`alteracao_clinica`) e calcula score clínico com NEWS2 atual, basal de 7 dias, delta, sinais vitais, alerta AURA e campos de intervenção.
 4. A análise gera uma fila de priorização e uma tabela `trainingRows`.
-5. Os scripts em `training/` geram CSV e treinam modelos baseline.
+5. Casos com reinternação/hospitalização/óbito recebem **análise retrospectiva de evitabilidade**: cruza alertas AURA em Pct Watcher com sinais de Registros na janela de **10 dias**, gera veredito (evitável / possivelmente / inevitável / sem sinal), motivos e melhor ação sugerida.
+6. Os scripts em `training/` geram CSV (também só com casos agudos) e treinam modelos baseline.
+
+Casos ainda abertos usam predição preventiva (`prob_readmission` / `prob_effective`). Casos com evento final **não** mostram probabilidade preventiva — mostram a revisão de evitabilidade.
 
 ## Rodar a aplicação
 

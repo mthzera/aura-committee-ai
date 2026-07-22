@@ -1,4 +1,12 @@
 import * as XLSX from "xlsx";
+import {
+  buildRetrospectiveAvoidability,
+  type RegistroHistoryRow,
+  type RetrospectiveAvoidability,
+  type WatcherHistoryRow,
+} from "@/lib/retrospective-avoidability";
+
+export type { RetrospectiveAvoidability } from "@/lib/retrospective-avoidability";
 
 export type TriageBand = "baixo" | "medio" | "alto" | "critico";
 
@@ -31,11 +39,13 @@ export interface TriageCase {
   committeeDiscussion: string | null;
   readmissionAvoided: string | null;
   dischargeDate: string | null;
+  recordDate: string | null;
   score: number;
   band: TriageBand;
   recommendation: string;
   trainingLabel: string;
   reasons: string[];
+  retrospective?: RetrospectiveAvoidability;
 }
 
 export interface TrainingDatasetRow {
@@ -58,11 +68,14 @@ export interface TrainingDatasetRow {
   completeness: number | null;
   aura_alerted_flag: number;
   acute_decompensation_flag: number;
+  monitoring_status: string;
+  final_event_flag: number;
   triage_score: number;
   triage_band: TriageBand;
   target_label: string;
   target_readmission_event: number;
   target_effective_intervention: number;
+  retrospective?: RetrospectiveAvoidability;
 }
 
 export interface ModelReadiness {
@@ -116,6 +129,7 @@ type Row = Record<string, unknown>;
 const SHEET_CANDIDATES = ["Pct Watcher", "Registros"];
 
 const FIELD_ALIASES: Record<string, string[]> = {
+  recordDate: ["data", "ultima_coleta", "data_hora"],
   patientName: ["paciente", "nome", "nome_do_paciente", "nome_paciente"],
   unit: ["unidade", "unidade_assistencial", "setor"],
   bed: ["leito"],
@@ -143,6 +157,11 @@ const FIELD_ALIASES: Record<string, string[]> = {
   committeeDiscussion: ["discussao_comite_aura"],
   readmissionAvoided: ["reinternacao_evitada"],
   dischargeDate: ["data_alta"],
+  trrTriggered: ["trr_acionado"],
+  notified: ["notificado"],
+  eligibleAura: ["elegivel_aura"],
+  scoreAtRisk: ["score_4", "score__4"],
+  deltaLabel: ["delta_m7d", "delta_score_m7d"],
 };
 
 const FEATURE_DEFS = [
@@ -175,7 +194,12 @@ const LABEL_DEFS = [
 ] as const;
 
 const FINAL_EVENT_TERMS = ["reintern", "hospitaliza", "internacao hospitalar", "internação hospitalar", "obito", "óbito"];
-const ACUTE_TERMS = ["descompensacao aguda", "descompensação aguda"];
+const ACUTE_TERMS = [
+  "descompensacao aguda",
+  "descompensação aguda",
+  "compensacao aguda",
+  "compensação aguda",
+];
 
 export function analyzeWorkbook(buffer: Buffer): TriageAnalysis {
   const workbook = XLSX.read(buffer, {
@@ -184,29 +208,76 @@ export function analyzeWorkbook(buffer: Buffer): TriageAnalysis {
     cellDates: true,
   });
 
-  const sheetName = SHEET_CANDIDATES.find((name) => workbook.SheetNames.includes(name)) ?? workbook.SheetNames[0];
-  if (!sheetName) {
+  const watcherSheetName =
+    workbook.SheetNames.find((name) => name === "Pct Watcher") ??
+    SHEET_CANDIDATES.find((name) => workbook.SheetNames.includes(name)) ??
+    workbook.SheetNames[0];
+  if (!watcherSheetName) {
     throw new Error("A planilha está vazia.");
   }
 
-  const sheet = workbook.Sheets[sheetName];
-  const rawRows = XLSX.utils.sheet_to_json<Row>(sheet, { defval: null, raw: true });
-  const rows = rawRows.map(normalizeRow);
+  const watcherSheet = workbook.Sheets[watcherSheetName];
+  const watcherRawRows = XLSX.utils.sheet_to_json<Row>(watcherSheet, { defval: null, raw: true });
+  const watcherRows = watcherRawRows.map(normalizeRow);
 
-  if (rows.length === 0) {
+  if (watcherRows.length === 0) {
     throw new Error("Não encontrei linhas úteis na planilha.");
   }
 
-  const cases = rows.map((row, index) => buildCase(row, index));
+  const registroRows =
+    workbook.SheetNames.includes("Registros") && watcherSheetName !== "Registros"
+      ? XLSX.utils
+          .sheet_to_json<Row>(workbook.Sheets.Registros, { defval: null, raw: true })
+          .map(normalizeRow)
+      : watcherSheetName === "Registros"
+        ? watcherRows
+        : [];
+
+  const acuteRows = watcherRows.filter((row) =>
+    isAcuteDecompensation(text(row, FIELD_ALIASES.clinicalAlteration))
+  );
+
+  if (acuteRows.length === 0) {
+    throw new Error("Não encontrei casos de descompensação aguda na planilha.");
+  }
+
+  const watcherHistory = watcherRows.map(toWatcherHistoryRow).filter((row) => !!row.patientName);
+  const registroHistory = registroRows.map(toRegistroHistoryRow).filter((row) => !!row.patientName);
+
+  const cases = acuteRows.map((row, index) => {
+    const base = buildCase(row, index);
+    if (!isFinalEventCase(base)) {
+      return base;
+    }
+
+    const retrospective = buildRetrospectiveAvoidability({
+      patientName: base.patientName,
+      unit: base.unit,
+      monitoringStatus: base.monitoringStatus,
+      clinicalOutcome: base.clinicalOutcome,
+      committeeDiscussion: base.committeeDiscussion,
+      interventionUnit: base.interventionUnit,
+      eventDate: base.dischargeDate ?? base.recordDate,
+      watcherHistory,
+      registroHistory,
+    });
+
+    return {
+      ...base,
+      recommendation: `Evitabilidade: ${retrospective.avoidability.split("_").join(" ")}. ${retrospective.bestAction}`,
+      retrospective,
+    };
+  });
+
   const summary = buildSummary(cases);
   const trainingRows = buildTrainingRows(cases);
-  const featureSignals = buildFeatureSignals(rows);
+  const featureSignals = buildFeatureSignals(acuteRows);
   const labelSignals = buildLabelSignals(cases);
   const modelReadiness = buildModelReadiness(trainingRows, featureSignals, labelSignals);
-  const notes = buildNotes(rows, cases);
+  const notes = buildNotes(acuteRows, cases, watcherRows.length, registroHistory.length);
 
   return {
-    sheetName,
+    sheetName: watcherSheetName,
     summary,
     cases: cases.sort((a, b) => b.score - a.score || a.patientName.localeCompare(b.patientName, "pt-BR")),
     trainingRows,
@@ -346,6 +417,7 @@ function buildCase(row: Row, index: number): TriageCase {
   const committeeDiscussion = text(row, FIELD_ALIASES.committeeDiscussion);
   const readmissionAvoided = text(row, FIELD_ALIASES.readmissionAvoided);
   const dischargeDate = validDateText(row, FIELD_ALIASES.dischargeDate);
+  const recordDate = validDateText(row, FIELD_ALIASES.recordDate);
 
   const reasons: string[] = [];
   let score = 0;
@@ -488,6 +560,7 @@ function buildCase(row: Row, index: number): TriageCase {
     committeeDiscussion,
     readmissionAvoided,
     dischargeDate,
+    recordDate,
     score: round(score),
     band,
     recommendation,
@@ -624,11 +697,18 @@ function buildTrainingRows(cases: TriageCase[]): TrainingDatasetRow[] {
     completeness: item.completeness,
     aura_alerted_flag: isYes(item.auraAlerted) ? 1 : 0,
     acute_decompensation_flag: isAcuteDecompensation(item.clinicalAlteration) ? 1 : 0,
+    monitoring_status: item.monitoringStatus ?? "",
+    final_event_flag:
+      item.trainingLabel === "reinternacao_inevitavel" ||
+      (item.monitoringStatus !== null && includesAny(item.monitoringStatus, FINAL_EVENT_TERMS))
+        ? 1
+        : 0,
     triage_score: item.score,
     triage_band: item.band,
     target_label: item.trainingLabel,
     target_readmission_event: item.trainingLabel === "reinternacao_inevitavel" ? 1 : 0,
     target_effective_intervention: ["reinternacao_evitada", "reversao_piora"].includes(item.trainingLabel) ? 1 : 0,
+    ...(item.retrospective ? { retrospective: item.retrospective } : {}),
   }));
 }
 
@@ -674,10 +754,32 @@ function buildModelReadiness(
   };
 }
 
-function buildNotes(rows: Row[], cases: TriageCase[]): string[] {
+function buildNotes(
+  rows: Row[],
+  cases: TriageCase[],
+  totalSheetRows?: number,
+  registroRowCount = 0
+): string[] {
   const notes = [
     "Base preparada a partir da aba Pct Watcher, que já traz NEWS2, basal de 7 dias e campos de decisão do comitê.",
+    "A fila do comitê inclui apenas casos de descompensação aguda (campo alteração clínica).",
   ];
+  if (typeof totalSheetRows === "number" && totalSheetRows > cases.length) {
+    notes.push(
+      `Filtro aplicado: ${cases.length} casos agudos de ${totalSheetRows} linhas da planilha.`
+    );
+  }
+  if (registroRowCount > 0) {
+    notes.push(
+      `Aba Registros cruzada para análise retrospectiva de evitabilidade (${registroRowCount} coletas).`
+    );
+  }
+  const retrospectiveCount = cases.filter((item) => !!item.retrospective).length;
+  if (retrospectiveCount > 0) {
+    notes.push(
+      `${retrospectiveCount} caso(s) com evento final receberam análise de evitabilidade (alertas Pct Watcher + sinais Registros, janela 10 dias).`
+    );
+  }
   const alertRate = cases.length ? cases.filter((item) => isYes(item.auraAlerted)).length / cases.length : 0;
   if (alertRate > 0.7) {
     notes.push("A maior parte da base já está marcada como alerta, então o modelo base tende a aprender melhor o refinamento do risco do que a detecção inicial.");
@@ -688,6 +790,43 @@ function buildNotes(rows: Row[], cases: TriageCase[]): string[] {
   }
   notes.push("Os rótulos derivados aqui são heurísticos e servem como ponto de partida para uma primeira base de treino, não como verdade final.");
   return notes;
+}
+
+function isFinalEventCase(item: TriageCase): boolean {
+  return (
+    item.trainingLabel === "reinternacao_inevitavel" ||
+    (item.monitoringStatus !== null && includesAny(item.monitoringStatus, FINAL_EVENT_TERMS))
+  );
+}
+
+function toWatcherHistoryRow(row: Row): WatcherHistoryRow {
+  return {
+    patientName: text(row, FIELD_ALIASES.patientName) ?? "",
+    date: validDateText(row, FIELD_ALIASES.recordDate) ?? validDateText(row, FIELD_ALIASES.dischargeDate),
+    unit: text(row, FIELD_ALIASES.unit) ?? "Sem unidade",
+    news2Last: numberValue(row, FIELD_ALIASES.news2Last),
+    news2Delta7d: numberValue(row, FIELD_ALIASES.news2Delta7d),
+    clinicalAlteration: text(row, FIELD_ALIASES.clinicalAlteration),
+    auraAlerted: text(row, FIELD_ALIASES.auraAlerted),
+    interventionUnit: text(row, FIELD_ALIASES.interventionUnit),
+    interventionResult: text(row, FIELD_ALIASES.interventionResult),
+    clinicalOutcome: text(row, FIELD_ALIASES.clinicalOutcome),
+    committeeDiscussion: text(row, FIELD_ALIASES.committeeDiscussion),
+    monitoringStatus: text(row, FIELD_ALIASES.monitoringStatus),
+    trrTriggered: text(row, FIELD_ALIASES.trrTriggered),
+  };
+}
+
+function toRegistroHistoryRow(row: Row): RegistroHistoryRow {
+  return {
+    patientName: text(row, FIELD_ALIASES.patientName) ?? "",
+    date: validDateText(row, FIELD_ALIASES.recordDate),
+    news2Last: numberValue(row, FIELD_ALIASES.news2Last),
+    deltaLabel: text(row, FIELD_ALIASES.deltaLabel),
+    notified: text(row, FIELD_ALIASES.notified),
+    eligibleAura: text(row, FIELD_ALIASES.eligibleAura),
+    scoreAtRisk: text(row, FIELD_ALIASES.scoreAtRisk),
+  };
 }
 
 function average(values: Array<number | null>): number {
